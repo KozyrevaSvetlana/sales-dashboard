@@ -9,6 +9,9 @@ RUN npm config set fetch-retries 5 \
  && npm ci
 
 COPY . .
+# Тесты — обязательный шаг сборки: если хоть один упал, образ не соберётся.
+RUN npm test
+# build = проверка типов (tsc) + production-сборка Vite
 RUN npm run build
 
 FROM nginx:1.27-alpine
