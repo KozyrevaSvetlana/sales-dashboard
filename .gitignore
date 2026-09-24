@@ -1,0 +1,19 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# Node
+node_modules/
+dist/
+coverage/
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+
+# Env
+.env
