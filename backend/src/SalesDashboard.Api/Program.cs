@@ -12,8 +12,15 @@ var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 // --- Инфраструктура ---
+string connection = builder.Configuration.GetConnectionString("Default")
+    ?? throw new InvalidOperationException("Не задана строка подключения ConnectionStrings:Default в appsettings.json.");
+
 builder.Services.AddDbContext<AppDbContext>(options => options
-    .UseNpgsql(config.GetConnectionString("Default"), npgsql => npgsql.EnableRetryOnFailure(maxRetryCount: 5))
+    .UseNpgsql(connection, npgsql =>
+    {
+        npgsql.EnableRetryOnFailure(maxRetryCount: 5);
+        npgsql.UseAdminDatabase("template1");
+    })
     .UseSnakeCaseNamingConvention());
 
 builder.Services.AddSingleton(TimeProvider.System);
@@ -43,7 +50,7 @@ app.UseStatusCodePages();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-await DatabaseInitializer.InitializeAsync(app.Services);
+await DatabaseInitializer.InitializeAsync(app.Services, app.Lifetime.ApplicationStopping);
 
 var api = app.MapGroup("/api");
 api.MapGet("/health", () => Results.Ok(new { status = "ok" })).WithTags("System");
