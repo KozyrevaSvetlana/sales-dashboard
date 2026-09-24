@@ -1,9 +1,12 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
-COPY package.json package-lock.json* ./
-# TODO: закоммитить package-lock.json и оставить только `npm ci`
-RUN if [ -f package-lock.json ]; then npm ci; else npm install; fi
+COPY package.json package-lock.json ./
+# Пакеты ставятся строго по package-lock.json; повторы — на случай нестабильной сети.
+RUN npm config set fetch-retries 5 \
+ && npm config set fetch-retry-mintimeout 20000 \
+ && npm config set fetch-retry-maxtimeout 120000 \
+ && npm ci
 
 COPY . .
 RUN npm run build
