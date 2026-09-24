@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using SalesDashboard.Api.Domain.Analytics;
 using SalesDashboard.Api.Domain.Periods;
 using SalesDashboard.Api.Features.Common;

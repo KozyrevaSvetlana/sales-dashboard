@@ -2,13 +2,13 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      POSTGRES_DB: sales
-      POSTGRES_USER: sales
-      POSTGRES_PASSWORD: sales
+      POSTGRES_DB: sales_dashboard
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sales -d sales"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d sales_dashboard"]
       interval: 3s
       timeout: 3s
       retries: 20
@@ -18,7 +18,7 @@ services:
   api:
     build: ./backend
     environment:
-      ConnectionStrings__Default: "Host=db;Port=5432;Database=sales;Username=sales;Password=sales"
+      ConnectionStrings__Default: "Host=db;Port=5432;Database=sales_dashboard;Username=postgres;Password=postgres"
       Dashboard__TimeZone: "Europe/Moscow"
     depends_on:
       db:
