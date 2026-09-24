@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.EntityFrameworkCore;
+using Scalar.AspNetCore;
 using SalesDashboard.Api.Common;
 using SalesDashboard.Api.Domain.Periods;
 using SalesDashboard.Api.Features.Kpi;
@@ -49,6 +50,11 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseSwagger();
 app.UseSwaggerUI();
+// Scalar — интерактивная документация API: http://localhost:<порт>/scalar/v1
+// Описание API берёт из того же swagger.json, что генерирует Swashbuckle.
+app.MapScalarApiReference(options => options
+    .WithTitle("Sales Dashboard API")
+    .WithOpenApiRoutePattern("/swagger/{documentName}/swagger.json"));
 
 await DatabaseInitializer.InitializeAsync(app.Services, app.Lifetime.ApplicationStopping);
 
