@@ -1,6 +1,7 @@
 import type { KpiResponse, MetricDto } from '../../api/types';
 import { formatCount, formatMoney, formatMoneyCompact, formatPercent, initials, type ChangeKind } from '../../shared/format';
 import type { Period } from '../../shared/period';
+import { AnimatedValue } from '../../shared/ui/AnimatedValue';
 import { AsyncBlock } from '../../shared/ui/AsyncBlock';
 import { Delta } from '../../shared/ui/Delta';
 import { Skeleton } from '../../shared/ui/States';
@@ -52,7 +53,9 @@ function KpiCard({ label, metric, format, changeKind }: KpiCardProps) {
   return (
     <article className="card kpi-card">
       <p className="kpi-card__label">{label}</p>
-      <p className="kpi-card__value">{format(metric.value)}</p>
+      <p className="kpi-card__value">
+        <AnimatedValue value={metric.value} format={format} />
+      </p>
       <p className="kpi-card__footer">
         <Delta change={metric.change} kind={changeKind} />
         <span className="muted">было {format(metric.previous)}</span>

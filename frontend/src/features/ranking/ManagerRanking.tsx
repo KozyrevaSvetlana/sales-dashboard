@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { RankingItemDto, RankingSort } from '../../api/types';
 import { formatCount, formatMoney, formatPercent, initials } from '../../shared/format';
+import { useFlipList } from '../../shared/hooks/useFlipList';
 import type { Period } from '../../shared/period';
 import { AsyncBlock } from '../../shared/ui/AsyncBlock';
 import { Delta } from '../../shared/ui/Delta';
@@ -49,6 +50,9 @@ export function ManagerRanking({ period }: { period: Period }) {
 }
 
 function RankingTable({ items }: { items: RankingItemDto[] }) {
+  // При смене сортировки или периода строки плавно переезжают на новые места.
+  const flipRef = useFlipList<HTMLTableRowElement>(items.map((item) => item.managerId));
+
   return (
     <table className="table">
       <thead>
@@ -65,7 +69,7 @@ function RankingTable({ items }: { items: RankingItemDto[] }) {
       </thead>
       <tbody>
         {items.map((item) => (
-          <tr key={item.managerId} className={item.salesCount === 0 ? 'is-dimmed' : undefined}>
+          <tr key={item.managerId} ref={flipRef(item.managerId)} className={item.salesCount === 0 ? 'is-dimmed' : undefined}>
             <td className="num">{item.rank}</td>
             <td>
               <div className="person">

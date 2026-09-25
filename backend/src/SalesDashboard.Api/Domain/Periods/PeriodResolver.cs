@@ -20,6 +20,17 @@ public sealed class PeriodResolver(TimeProvider clock, TimeZoneInfo businessTime
 
     public TimeZoneInfo BusinessTimeZone => businessTimeZone;
 
+    /// <summary>
+    /// IANA-имя часового пояса (Europe/Moscow) — его понимает PostgreSQL в AT TIME ZONE.
+    /// На Windows TimeZoneInfo может хранить Windows-имя (Russian Standard Time), поэтому конвертируем.
+    /// </summary>
+    public string BusinessTimeZoneIanaId =>
+        businessTimeZone.HasIanaId
+            ? businessTimeZone.Id
+            : TimeZoneInfo.TryConvertWindowsIdToIanaId(businessTimeZone.Id, out var ianaId)
+                ? ianaId
+                : throw new InvalidOperationException($"Не удалось определить IANA-имя часового пояса {businessTimeZone.Id}.");
+
     public DateOnly Today() =>
         DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(clock.GetUtcNow(), businessTimeZone).DateTime);
 

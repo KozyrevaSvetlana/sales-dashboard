@@ -17,4 +17,11 @@ public static class SaleRules
 {
     public static readonly Expression<Func<Sale, bool>> CountsTowardsRevenue =
         sale => sale.Status == SaleStatus.Paid;
+
+    // Та же проверка для данных, уже загруженных в память (например, в ленте последних продаж).
+    // Компилируется из того же Expression — второго источника правды нет.
+    private static readonly Func<Sale, bool> CountsTowardsRevenueCompiled = CountsTowardsRevenue.Compile();
+
+    public static bool CountsTowardsRevenueFor(SaleStatus status) =>
+        CountsTowardsRevenueCompiled(new Sale { Status = status });
 }

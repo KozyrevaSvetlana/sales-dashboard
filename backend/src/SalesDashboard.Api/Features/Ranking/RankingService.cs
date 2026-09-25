@@ -28,7 +28,8 @@ public sealed class RankingService(AppDbContext db, PeriodResolver periods)
 
         // Менеджеров ~20, поэтому «LEFT JOIN» делаем в памяти: так в рейтинг попадают
         // и менеджеры без продаж за период (с нулями), а не пропадают из таблицы.
-        var managers = await db.Managers.AsNoTracking()
+        var managers = await db.Managers
+            .AsNoTracking()
             .OrderBy(m => m.Id)
             .Select(m => new { m.Id, m.FullName, m.Team, m.IsActive })
             .ToListAsync(ct);

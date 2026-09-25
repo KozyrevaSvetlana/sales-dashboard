@@ -2,14 +2,16 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
 # 1. Restore: сначала только файлы проектов — слой кэшируется, пока не меняются зависимости
-COPY Directory.Build.props SalesDashboard.sln ./
+COPY Directory.Build.props ./
 COPY src/SalesDashboard.Api/SalesDashboard.Api.csproj src/SalesDashboard.Api/
 COPY tests/SalesDashboard.Tests/SalesDashboard.Tests.csproj tests/SalesDashboard.Tests/
-RUN dotnet restore SalesDashboard.sln
+# Юнит-тесты ссылаются на API, поэтому restore тестового проекта восстанавливает оба.
+# Интеграционные тесты (Testcontainers) в образ не входят: внутри docker build нет Docker-демона.
+RUN dotnet restore tests/SalesDashboard.Tests/SalesDashboard.Tests.csproj
 
-# 2. Исходники приложения и тестов
+# 2. Исходники приложения и юнит-тестов
 COPY src/ src/
-COPY tests/ tests/
+COPY tests/SalesDashboard.Tests/ tests/SalesDashboard.Tests/
 
 # 3. Тесты — обязательный шаг сборки: если хоть один упал, образ не соберётся
 #    и `docker compose up --build` остановится с ошибкой.

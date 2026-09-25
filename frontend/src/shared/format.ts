@@ -10,7 +10,8 @@ const compactMoneyFormat = new Intl.NumberFormat('ru-RU', {
   notation: 'compact',
   maximumFractionDigits: 1,
 });
-const countFormat = new Intl.NumberFormat('ru-RU');
+// Целые: во время анимации счётчика значения дробные — показываем без дробной части.
+const countFormat = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 0 });
 const percentFormat = new Intl.NumberFormat('ru-RU', { style: 'percent', maximumFractionDigits: 1 });
 const signedPercentFormat = new Intl.NumberFormat('ru-RU', {
   style: 'percent',
@@ -19,6 +20,7 @@ const signedPercentFormat = new Intl.NumberFormat('ru-RU', {
 });
 const signedNumberFormat = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 1, signDisplay: 'exceptZero' });
 const dateFormat = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' });
+const monthFormat = new Intl.DateTimeFormat('ru-RU', { month: 'short' });
 
 export const formatMoney = (value: number | null): string => (value === null ? EMPTY : moneyFormat.format(value));
 
@@ -55,6 +57,23 @@ export function formatDate(isoDate: string): string {
 
 export const formatDateRange = (from: string, to: string): string =>
   from === to ? formatDate(from) : `${formatDate(from)} — ${formatDate(to)}`;
+
+/** yyyy-MM-01 → «сент. 26» — подпись точки помесячного графика. */
+export function formatMonth(isoDate: string): string {
+  const [year = 1970, month = 1] = isoDate.split('-').map(Number);
+  // Intl с year: '2-digit' добавляет «г.», поэтому год дописываем сами.
+  return `${monthFormat.format(new Date(year, month - 1, 1))} ${String(year % 100).padStart(2, '0')}`;
+}
+
+/**
+ * «2026-09-24T14:05:00+03:00» → «24 сент., 14:05».
+ * Берём дату и время как есть из строки: API уже отдаёт их в часовом поясе компании,
+ * а пересчёт в часовой пояс браузера исказил бы бизнес-время.
+ */
+export function formatDateTime(isoDateTime: string): string {
+  const [date = '', time = ''] = isoDateTime.split('T');
+  return `${formatDate(date)}, ${time.slice(0, 5)}`;
+}
 
 export const initials = (fullName: string): string =>
   fullName

@@ -1,58 +1,34 @@
-// Контракт API. Сейчас описан вручную; следующий шаг — генерировать из Swagger
-// (openapi-typescript), чтобы фронт и бэк не расходились.
+// Типы контракта API. Источник правды — OpenAPI-схема бэкенда:
+// schema.d.ts генерируется командой `npm run gen:api` (при запущенном API).
+// Здесь только короткие имена, чтобы компоненты не зависели от формата генератора.
 
-export type PeriodPreset = 'Today' | 'Last7Days' | 'Last30Days' | 'CurrentMonth' | 'PreviousMonth' | 'Custom';
-export type RankingSort = 'GrossProfit' | 'AverageCheck';
+import type { components } from './schema';
 
-/** Даты в формате yyyy-MM-dd, включительно. */
-export interface PeriodDto {
-  from: string;
-  to: string;
-  previousFrom: string;
-  previousTo: string;
-}
+type Schemas = components['schemas'];
+
+export type PeriodDto = Schemas['PeriodDto'];
+export type MetricDto = Schemas['MetricDto'];
+export type TopManagerDto = Schemas['TopManagerDto'];
+export type KpiResponse = Schemas['KpiResponse'];
+
+export type RankingSort = Schemas['RankingSort'];
+export type RankingItemDto = Schemas['RankingItemDto'];
+export type RankingResponse = Schemas['RankingResponse'];
+
+export type TrendGranularity = Schemas['TrendGranularity'];
+export type TrendPointDto = Schemas['TrendPointDto'];
+export type TrendsResponse = Schemas['TrendsResponse'];
+
+export type CategorySalesDto = Schemas['CategorySalesDto'];
+export type ProductSalesDto = Schemas['ProductSalesDto'];
+export type CategoriesResponse = Schemas['CategoriesResponse'];
+
+export type SaleStatus = Schemas['SaleStatus'];
+export type RecentSaleDto = Schemas['RecentSaleDto'];
+export type RecentSalesResponse = Schemas['RecentSalesResponse'];
 
 /**
- * change: для денежных и счётных метрик — относительное изменение (0.12 = +12%),
- * для маржи — абсолютное в долях (0.015 = +1,5 п.п.). null — сравнить не с чем.
+ * Пресет периода — это query-параметр, а не часть ответа; Swashbuckle может описать его
+ * inline, без отдельной схемы. Поэтому тип задан явно и сверяется с enum PeriodPreset на бэкенде.
  */
-export interface MetricDto {
-  value: number | null;
-  previous: number | null;
-  change: number | null;
-}
-
-export interface TopManagerDto {
-  id: number;
-  fullName: string;
-  grossProfit: number;
-}
-
-export interface KpiResponse {
-  period: PeriodDto;
-  revenue: MetricDto;
-  grossProfit: MetricDto;
-  margin: MetricDto;
-  salesCount: MetricDto;
-  averageCheck: MetricDto;
-  topManager: TopManagerDto | null;
-}
-
-export interface RankingItemDto {
-  rank: number;
-  managerId: number;
-  fullName: string;
-  team: string;
-  salesCount: number;
-  revenue: number;
-  grossProfit: number;
-  margin: number | null;
-  averageCheck: number | null;
-  change: number | null;
-}
-
-export interface RankingResponse {
-  period: PeriodDto;
-  sortBy: RankingSort;
-  items: RankingItemDto[];
-}
+export type PeriodPreset = 'Today' | 'Last7Days' | 'Last30Days' | 'CurrentMonth' | 'PreviousMonth' | 'Custom';

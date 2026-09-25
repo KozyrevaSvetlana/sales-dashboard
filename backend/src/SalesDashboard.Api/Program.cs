@@ -3,8 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 using SalesDashboard.Api.Common;
 using SalesDashboard.Api.Domain.Periods;
+using SalesDashboard.Api.Features.Categories;
 using SalesDashboard.Api.Features.Kpi;
 using SalesDashboard.Api.Features.Ranking;
+using SalesDashboard.Api.Features.RecentSales;
+using SalesDashboard.Api.Features.Trends;
 using SalesDashboard.Api.Infrastructure;
 using SalesDashboard.Api.Infrastructure.Persistence;
 using SalesDashboard.Api.Infrastructure.Seeding;
@@ -34,15 +37,27 @@ builder.Services.AddScoped<DataSeeder>();
 // --- Фичи ---
 builder.Services.AddScoped<KpiService>();
 builder.Services.AddScoped<RankingService>();
-// TODO: TrendsService, CategoriesService, RecentSalesService
+builder.Services.AddScoped<TrendsService>();
+builder.Services.AddScoped<CategoriesService>();
+builder.Services.AddScoped<RecentSalesService>();
 
 // --- HTTP ---
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.ConfigureHttpJsonOptions(options =>
     options.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+// Swashbuckle строит схемы по MVC JsonOptions — дублируем настройку, чтобы enum'ы
+// и в OpenAPI были строками ("GrossProfit"), как в реальных ответах API.
+builder.Services.Configure<Microsoft.AspNetCore.Mvc.JsonOptions>(options =>
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Точная схема для генерации TypeScript-типов (npm run gen:api во frontend/):
+    options.SupportNonNullableReferenceTypes();              // string ≠ string | null
+    options.UseAllOfToExtendReferenceSchemas();              // nullable-ссылки: TopManagerDto | null
+    options.SchemaFilter<RequireAllPropertiesSchemaFilter>(); // все поля ответа всегда присутствуют
+});
 
 var app = builder.Build();
 
@@ -62,6 +77,9 @@ var api = app.MapGroup("/api");
 api.MapGet("/health", () => Results.Ok(new { status = "ok" })).WithTags("System");
 api.MapKpiEndpoints();
 api.MapRankingEndpoints();
+api.MapTrendsEndpoints();
+api.MapCategoriesEndpoints();
+api.MapRecentSalesEndpoints();
 
 app.Run();
 

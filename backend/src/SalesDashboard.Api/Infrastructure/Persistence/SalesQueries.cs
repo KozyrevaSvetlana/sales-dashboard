@@ -11,11 +11,15 @@ namespace SalesDashboard.Api.Infrastructure.Persistence;
 /// </summary>
 public static class SalesQueries
 {
+    /// <summary>Все продажи (любой статус) внутри периода [from, to).</summary>
+    public static IQueryable<Sale> InRange(this IQueryable<Sale> sales, UtcRange range) =>
+        sales.Where(s => s.SoldAtUtc >= range.FromUtc && s.SoldAtUtc < range.ToUtcExclusive);
+
     /// <summary>Продажи, которые учитываются в выручке, внутри периода [from, to).</summary>
     public static IQueryable<Sale> CountedInRange(this IQueryable<Sale> sales, UtcRange range) =>
         sales
             .Where(SaleRules.CountsTowardsRevenue)
-            .Where(s => s.SoldAtUtc >= range.FromUtc && s.SoldAtUtc < range.ToUtcExclusive);
+            .InRange(range);
 
     /// <summary>Три компактных агрегатных запроса вместо загрузки продаж в память.</summary>
     public static async Task<SalesTotals> GetTotalsAsync(this IQueryable<Sale> sales, CancellationToken ct)

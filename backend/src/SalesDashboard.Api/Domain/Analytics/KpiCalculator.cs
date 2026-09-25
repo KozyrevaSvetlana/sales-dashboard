@@ -54,4 +54,12 @@ public static class KpiCalculator
     /// </summary>
     public static decimal? AbsoluteChange(decimal? current, decimal? previous) =>
         current is null || previous is null ? null : current.Value - previous.Value;
+
+    /// <summary>Доля части в целом (0.25 = 25%). null, если целое равно нулю.</summary>
+    public static decimal? Share(decimal part, decimal total) =>
+        total == 0m ? null : part / total;
+
+    /// <summary>Маржа по выручке и себестоимости (0.25 = 25%). null при нулевой выручке.</summary>
+    public static decimal? Margin(decimal revenue, decimal cost) =>
+        revenue == 0m ? null : (revenue - cost) / revenue;
 }
